@@ -1,0 +1,100 @@
+plugins {
+    id 'java'
+    id "com.github.johnrengelman.shadow" version "7.1.0"
+}
+
+group = 'me.epic'
+version = '1.0.0'
+
+subprojects {
+    apply plugin: 'java'
+    apply plugin: 'com.github.johnrengelman.shadow'
+
+    repositories {
+        mavenCentral()
+        mavenLocal()
+        maven { url = 'https://maven.pkg.github.com/The-Epic/EpicSpigotLib' }
+        maven {
+            name = 'spigotmc-repo'
+            url = 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/'
+        }
+        maven {
+            name = 'sonatype'
+            url = 'https://oss.sonatype.org/content/groups/public/'
+        }
+    }
+
+    shadowJar {
+        archiveFileName = "${project.name}.jar"
+        destinationDirectory = file("../temp/")
+    }
+
+    build {
+        dependsOn shadowJar
+    }
+}
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+    maven { url = 'https://maven.pkg.github.com/The-Epic/EpicSpigotLib' }
+    maven {
+        name = 'spigotmc-repo'
+        url = 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/'
+    }
+    maven {
+        name = 'sonatype'
+        url = 'https://oss.sonatype.org/content/groups/public/'
+    }
+}
+
+dependencies {
+    implementation fileTree("temp")
+    implementation 'me.epic:epicspigotlib:1.0.0-SNAPSHOT'
+    compileOnly 'org.spigotmc:spigot-api:1.17.1-R0.1-SNAPSHOT'
+}
+
+
+jar {
+    from {
+        for (File file : new File("temp").listFiles()) {
+            zipTree(file)
+        }
+    }
+}
+
+shadowJar {
+    dependsOn(jar)
+    minimize()
+
+    delete fileTree("./target") {
+        exclude archiveName
+    }
+
+
+    archiveFileName = "${project.name}-${project.version}.jar"
+    destinationDirectory = file("./target/")
+    minimize()
+}
+
+clean {
+    delete file("./temp/")
+}
+
+build {
+    dependsOn shadowJar
+    dependsOn clean
+}
+
+
+processResources {
+    def props = [version: version]
+    inputs.properties props
+    filteringCharset 'UTF-8'
+    filesMatching('plugin.yml') {
+        expand props
+    }
+}
+
+shadowJar.shouldRunAfter build
+build.shouldRunAfter subprojects.build

@@ -1,0 +1,8 @@
+name: Coolplugin
+version: '${version}'
+main: me.epic.coolplugin.Coolplugin
+api-version: 1.17
+libraries:
+  - 'com.zaxxer:HikariCP:5.0.1'
+  - 'net.kyori:adventure-text-minimessage:4.11.0'
+  - 'net.kyori:adventure-text-serializer-legacy:4.11.0'
